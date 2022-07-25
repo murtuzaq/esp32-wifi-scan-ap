@@ -9,12 +9,32 @@
 
 #define MAXIMUM_AP_SCAN 20
 static void  wifi_init(void);
+static void  wifi_scan(void);
 static char* getAuthModeName(wifi_auth_mode_t auth_mode);
 
 void app_main(void)
 {
     wifi_init();
+    wifi_scan();
 
+    return;
+}
+
+static void wifi_init(void)
+{
+    nvs_flash_init();
+    esp_netif_init();
+    esp_event_loop_create_default();
+
+    wifi_init_config_t wifi_config = WIFI_INIT_CONFIG_DEFAULT();
+    esp_wifi_init(&wifi_config);
+
+    esp_wifi_set_mode(WIFI_MODE_STA);
+    esp_wifi_start();
+}
+
+static void wifi_scan(void)
+{
     wifi_scan_config_t wifi_scan_config;
     memset(&wifi_scan_config, 0, sizeof(wifi_scan_config));
     wifi_scan_config.show_hidden = true;
@@ -33,21 +53,6 @@ void app_main(void)
         printf("%32s | %7d | %4d | %12s\n", (char*)wifi_ap_records[i].ssid, wifi_ap_records[i].primary,
                wifi_ap_records[i].rssi, getAuthModeName(wifi_ap_records[i].authmode));
     printf("----------------------------------------------------------------\n");
-
-    return;
-}
-
-static void wifi_init(void)
-{
-    nvs_flash_init();
-    esp_netif_init();
-    esp_event_loop_create_default();
-
-    wifi_init_config_t wifi_config = WIFI_INIT_CONFIG_DEFAULT();
-    esp_wifi_init(&wifi_config);
-
-    esp_wifi_set_mode(WIFI_MODE_STA);
-    esp_wifi_start();
 }
 
 static char* getAuthModeName(wifi_auth_mode_t auth_mode)
